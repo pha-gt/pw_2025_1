@@ -1,0 +1,35 @@
+* {
+    background: cyan ;
+}
+
+h1 {
+    color: rgb(255,0,0);
+}
+
+h2, p {
+    color:blue;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+/*
+p {
+    background: greenyellow;
+    font-size: 15px;
+}*/
+.introduccion {
+    font-size: larger;
+
+}
+
+.fblanco
+{
+    background: white;
+    text-shadow:4px 4px 4px #40f;
+}
+
+#tprincipal{
+    font-family: cursive;
+}
+
+
+
