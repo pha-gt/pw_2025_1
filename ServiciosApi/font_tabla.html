@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Document</title>
+    <script>
+
+        
+        const CONSULTA_AUTO = "http://localhost/pw_2025_1/ServiciosApi/API/Auto.php";
+
+        function obtenerDatos()
+        {
+            /* ESTRUCTURA
+            fetch(‘url ‘, {
+                method: (‘GET/POST/PUT/DELETE ‘,        //optional
+                headers: {                              //optional
+                    Content-Type ‘: application/json ‘  //optional
+                    ...
+                },
+                body: formData                          //optional
+            })
+                .then(response => response.json()) 
+                .then(json => console.log(json))
+                .catch(err => console.log(err));
+            */
+            fetch(CONSULTA_AUTO)
+            .then(response => response.json()) 
+            .then(function (json) {
+                console.log("datos");
+                console.log(json);
+                console.log("datos2"); 
+                dibujar_tabla(); 
+            })
+            .catch(err => console.log(err))
+        }
+
+
+        function dibujar_tabla(){
+            let espacio = document.getElementById("div_tabla");
+            espacio.innerHTML="HOLA";
+        }
+
+        
+
+
+
+        
+    </script>
+</head>
+<body>
+    <button type="button" onclick="obtenerDatos();">INVOCAR </button>
+    <div id="div_tabla"></div>
+</body>
+</html>
