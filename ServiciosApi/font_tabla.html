@@ -25,22 +25,60 @@
                 .then(json => console.log(json))
                 .catch(err => console.log(err));
             */
+
+
+
             fetch(CONSULTA_AUTO)
             .then(response => response.json()) 
             .then(function (json) {
-                console.log("datos");
-                console.log(json);
-                console.log("datos2"); 
-                dibujar_tabla(); 
+                console.log("invocado");
+                console.dir(json);
+                dibujar_tabla(json);
+
             })
             .catch(err => console.log(err))
+
+            console.log("HOLA");
         }
 
 
-        function dibujar_tabla(){
+        function dibujar_tabla(lista_auto){
+
+            html=
+                `<table class="table">
+                <thead>
+                    <tr>
+                    <th scope="col">Marca</th>
+                    <th scope="col">Pais</th>
+                    <th scope="col">Modelo</th>
+                    <th scope="col">Año</th>
+                    <th scope="col">Motor</th>
+                    <th scope="col">Cilintros</th>
+                    <th scope="col">Capacidad</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            for(let i=0;i<lista_auto.length;i++)
+            {
+                html =html +
+                `<tr>
+                    <th scope='row'>${lista_auto[i].Marca.Nombre }</th>
+                    <td>${lista_auto[i].Marca.Pais }</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                    </tr>`;
+            }
+            html =html +
+                    ` </tbody>
+                        </table>`;
+    
             let espacio = document.getElementById("div_tabla");
-            espacio.innerHTML="HOLA";
+            espacio.innerHTML= html;
+
+
         }
+
 
         
 
