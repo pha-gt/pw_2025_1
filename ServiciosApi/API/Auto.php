@@ -43,7 +43,7 @@ class Vehiculo{
 $motor_sky = new Motor("Skyactive g", 4, 1.5);
 $marca_mazda = new Marca("Mazda", "Japon");
 $auto1= new Vehiculo("2","2020",$marca_mazda,$motor_sky);
-$auto2= new Vehiculo("3","2020",$marca_mazda,$motor_sky);
+$auto2= new Vehiculo("3","2022",$marca_mazda,$motor_sky);
 
 $lista = array($auto1, $auto2);
 //print_r($auto1);
