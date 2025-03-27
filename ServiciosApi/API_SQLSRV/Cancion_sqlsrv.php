@@ -20,7 +20,7 @@ switch($_SERVER['REQUEST_METHOD'])
         _get();
     break;
     case 'PUT':   //Update
-        _puts($data);
+        _put($data);
     break;
     case 'DELETE':   //Delete
         _delete($data);
@@ -38,7 +38,7 @@ function _post($datos)
     //indicar el valor de respuesta como 0 para indicar que no fue exitoso;
     $respuesta=0;
 
-    if($datos==null) 
+    if($datos==null || (!isset($datos->titulo) ||  !isset($datos->artista) || !isset($datos->duracion)))
     {
         echo "SIN DATOS";
         return;
@@ -100,14 +100,15 @@ function _post($datos)
 //rutina para Read
 function _get()
 {
+   
     //incluir el codigo para acceder a la base de datos
     include("./conexion_sqlsrv.php");
-
+    
     //inicializar el statement en null
     $stmt = null;
     //Definir la respuesta con un arreglo vacio
     $respuesta = array();
-
+   
     //intentar consultar la tabla
     try
     {
@@ -116,18 +117,20 @@ function _get()
         {
             //consultar solo un registro
             $cadena_sql = "SELECT id, titulo, artista, duracion, archivo, estado
-                            FROM musica.dbo.melodias where id = ?;";
-
-            $stmt = sqlsrv_prepare( $conn, $cadena_sql, array($_GET["melodia"]));
+                            FROM musica.dbo.melodias WHERE id = ?  AND estado = 1;";
+            //sentencia mediante query
+            $stmt = sqlsrv_query( $conn, $cadena_sql, array($_GET["melodia"]));
 
         }
         else
         {
+
             //consultar todos los registros
             $cadena_sql = "SELECT id, titulo, artista, duracion, archivo, estado
-            FROM musica.dbo.melodias";
+            FROM musica.dbo.melodias WHERE estado = 1";
 
-            $stmt = sqlsrv_prepare( $conn, $cadena_sql);
+            //sentencia mediante query
+            $stmt = sqlsrv_query( $conn, $cadena_sql );
         }
 
 
@@ -141,7 +144,7 @@ function _get()
         {
             //mientras fetch permita segir obteniedo valores
             while($resultados = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_NUMERIC)) {
-                echo "Enntro";
+
                 //mapear los datos con variables locales
                 $registro_melodia = new Melodia($resultados[0],utf8_encode($resultados[1]),utf8_encode($resultados[2]),$resultados[3],$resultados[4]);
                 /*
@@ -191,34 +194,44 @@ function _get()
 
 
 //rutina para Update
-function _puts($datos)
+function _put($datos)
 {
     //indicar el valor de respuesta como 0 para indicar que no fue exitoso;
     $respuesta=0;
+
     //verificar que los datos para editar estan completos 
-    if( isset($datos->melodia) 
-        && isset($datos->titulo) && isset($datos->artista) && isset($datos->duracion)){
+    if( isset($datos->melodia) && isset($datos->titulo) && isset($datos->artista) && isset($datos->duracion) ){
 
         //incluir el codigo para acceder a la base de datos
-        include("./conn/conexion.php");
+        include("./conexion_sqlsrv.php");
+        //Intentar actualizar renglon en tabla de melodia
         try{
             //Sentencia SQL para update
-            if($stmt = $mysqli->prepare("UPDATE melodias SET titulo=?, artista=?, duracion=? WHERE id=?;"))
-            {
-                //definir los valores que tendran los valores ? definidos en la cadena preapare        
-                $stmt->bind_param("sssi",$datos->titulo,$datos->artista,$datos->duracion,$datos->melodia);
-                //invocar la ejecución de la sentencia
-                $stmt->execute();
 
-                //invocar cerrar la consulta
-                $stmt->close();
-                //cambiar el valor de respuesta a 1 para indicar exito
-                $respuesta=1;
+            $cadena_sql = 
+            "UPDATE musica.dbo.melodias
+            SET titulo=?, artista=?, duracion=?
+            WHERE id=?";
+            
+            //Sentencia de insercion mediante prapare
+            $stmt = sqlsrv_prepare( $conn, $cadena_sql, array($datos->titulo, $datos->artista, $datos->duracion, $datos->melodia ));
+
+            if(!$stmt)
+            {
+                //die( print_r( sqlsrv_errors(), true));
+                echo "Error en la preparacion de la consulta";
             }
             else
             {
-                //No puedo realizarse la sentencia SQL, la sentencia puede contener errores. 
-                echo "No disponible ::";
+                //Ejecutar la sentencia
+                if( sqlsrv_execute( $stmt ) === false ) {
+                    //die( print_r( sqlsrv_errors(), true));
+                    echo "Error en la ejecucion de la consulta";
+                }
+                else
+                {
+                    $respuesta=1;
+                }
             }
         }catch (Exception $e) {
             //Codigo para realizar en caso de exepcion
@@ -230,7 +243,7 @@ function _puts($datos)
             //Intentar cerrar la conexión. 
             try {
                 //sentencia de cerrar conexión
-                $mysqli->close();    
+                sqlsrv_close ($conn );  
             } catch (Exception $e) {
                 //Error al cerrar la conexión. 
             }
@@ -238,11 +251,12 @@ function _puts($datos)
     }
     else
     {
-        //echo "Sin datos";
          die("Error: Sin datos.");
     }
     echo json_encode($respuesta);
 }
+
+
 
 //rutina para Delete
 function _delete($datos)
@@ -253,26 +267,38 @@ function _delete($datos)
     if(isset($datos->melodia)){
 
         //incluir el codigo para acceder a la base de datos
-        include("./conn/conexion.php");
+        include("./conexion_sqlsrv.php");
+
+        //Intentar actualizar renglon en tabla de melodia
         try{
             //Sentencia SQL para update
-            if($stmt = $mysqli->prepare("UPDATE melodias SET estado=0 WHERE id=?;"))
-            {
-                //definir los valores que tendran los valores ? definidos en la cadena preapare        
-                $stmt->bind_param("i",$datos->melodia);
-                //invocar la ejecución de la sentencia
-                $stmt->execute();
 
-                //invocar cerrar la consulta
-                $stmt->close();
-                //cambiar el valor de respuesta a 1 para indicar exito
-                $respuesta=1;
+            $cadena_sql = 
+            "UPDATE musica.dbo.melodias
+            SET estado=0 
+            WHERE id=?";            
+
+            //Sentencia de insercion mediante prapare
+            $stmt = sqlsrv_prepare( $conn, $cadena_sql, array( $datos->melodia ));
+
+            if(!$stmt)
+            {
+                //die( print_r( sqlsrv_errors(), true));
+                echo "Error en la preparacion de la consulta";
             }
             else
             {
-                //No puedo realizarse la sentencia SQL, la sentencia puede contener errores. 
-                echo "No disponible ::";
+                //Ejecutar la sentencia
+                if( sqlsrv_execute( $stmt ) === false ) {
+                    //die( print_r( sqlsrv_errors(), true));
+                    echo "Error en la ejecucion de la consulta";
+                }
+                else
+                {
+                    $respuesta=1;
+                }
             }
+
         }catch (Exception $e) {
             //Codigo para realizar en caso de exepcion
             echo "Exception ::".$e->getMessage();
@@ -283,7 +309,7 @@ function _delete($datos)
             //Intentar cerrar la conexión. 
             try {
                 //sentencia de cerrar conexión
-                $mysqli->close();    
+                sqlsrv_close ($conn );  
             } catch (Exception $e) {
                 //Error al cerrar la conexión. 
             }
