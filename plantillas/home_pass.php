@@ -8,10 +8,15 @@ if(isset($_POST["usuario"]) && isset($_POST["pass"]))
     {
         $_SESSION["USER_NAME"] = "FABIAN GONZALEZ";
         echo "Bienvenido";
+        header('Location: '.'./home.php');
     }
     else
     {
         echo "Credenciales no validas";
+        $_SESSION["MSJ_SESION"] = "Credenciales no validas";
+        header('Location: '.'./home.php');
+
+
     }
 }
 else 
@@ -19,6 +24,6 @@ else
     echo "No fue posible iniciar sesion";
 }
 
-header('Location: '.'./home.php');
+//header('Location: '.'./home.php');
 
 ?>

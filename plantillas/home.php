@@ -8,6 +8,7 @@
     <title>Document</title>
 </head>
 <body>
+
 <?php
 
     if(isset($_SESSION['USER_NAME']))
@@ -18,6 +19,13 @@
     else
     { 
         echo "<h1> Hola Inicia Sesion </h1>";
+
+
+        if(isset($_SESSION['MSJ_SESION']))
+        {
+            echo "ERROR".$_SESSION['MSJ_SESION'];
+            unset($_SESSION['MSJ_SESION']);
+        }
 
         echo '
            <form action="./home_pass.php" method="post">
